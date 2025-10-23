@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#000000" />
+  <title>TikTok Gift – Claim</title>
+  <style>
+    :root{
+      --bg1:#0f0f12; --bg2:#0a0a0d; --tiktok-pink:#ff2d55; --tiktok-cyan:#20f2ff; --accent:#ff3b30;
+      --safe-area-inset-top: env(safe-area-inset-top); 
+      --safe-area-inset-bottom: env(safe-area-inset-bottom);
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%;margin:0}
+    body{
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;
+      color:#fff;
+      background: radial-gradient(120vh 120vh at 20% 10%, rgba(32,242,255,.15), transparent 60%),
+                  radial-gradient(120vh 120vh at 80% 90%, rgba(255,45,85,.15), transparent 60%),
+                  linear-gradient(180deg, var(--bg1), var(--bg2));
+      overflow:hidden;
+    }
+    .app{
+      position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding: max(12px, var(--safe-area-inset-top)) 16px max(16px, var(--safe-area-inset-bottom));
+      gap: clamp(16px, 6vh, 28px);
+    }
+    .stage{
+      position:relative; width:min(92vw, 520px); aspect-ratio: 1 / 1.05; display:grid; place-items:center;
+    }
+    .chest-wrap{ position:relative; width: min(82vw, 420px); }
+    .chest{
+      width:100%; display:block; filter: drop-shadow(0 20px 40px rgba(0,0,0,.45));
+      transition: transform .25s ease;
+    }
+    .chest.bounce{ animation: bounce 1s ease-in-out infinite; }
+    @keyframes bounce{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-1.2%)} }
+    .btn{
+      display:inline-grid; place-items:center; width:min(88vw,420px); height:clamp(54px,10.5vh,64px);
+      border-radius:20px; background: linear-gradient(150deg, #ff5b57, #c50f0f);
+      box-shadow: 0 8px 24px rgba(255,59,48,.35), inset 0 2px 0 rgba(255,255,255,.2);
+      color:white; font-weight:800; font-size: clamp(18px, 6vw, 22px); letter-spacing:.02em; text-transform:uppercase;
+      border:none; outline:none; cursor:pointer; transition: transform .15s ease, opacity .3s ease, filter .2s ease;
+    }
+    .btn:active{ transform: scale(.98); }
+    .btn[disabled]{ opacity:.65; filter:grayscale(.2); cursor:default }
+    .btn.fade-out { opacity:0; pointer-events:none; }
+    .gift{
+      position:absolute; inset:0; margin:auto; width:min(60vw, 280px); aspect-ratio:1/1; border-radius:24px;
+      display:grid; place-items:center; overflow:hidden;
+      transform: translateY(20%) scale(.1); opacity:0; z-index:6;
+    }
+    .gift img { width:100%; height:100%; object-fit:contain; }
+    .gift.show{ animation: gift-pop 900ms cubic-bezier(.2,1.2,.2,1) forwards }
+    @keyframes gift-pop{
+      0%{ transform: translateY(8%) scale(.1); opacity:0 }
+      60%{ transform: translateY(-6%) scale(1.05); opacity:1 }
+      100%{ transform: translateY(0) scale(1); opacity:1 }
+    }
+    .claimed{
+      position:absolute; top:3%; left:0; right:0; text-align:center; font-weight:1000;
+      font-size: clamp(22px, 8vw, 36px); letter-spacing:.06em; z-index:7; opacity:0; text-transform:uppercase;
+      text-shadow: 0 0 12px rgba(32,242,255,.6), 0 0 20px rgba(255,45,85,.5);
+      white-space:nowrap;
+    }
+    .claimed.flicker{ animation: flicker 1200ms steps(2,end) infinite alternate, claimed-in .5s ease forwards }
+    @keyframes claimed-in{ from{opacity:0; transform:translateY(-8px)} to{opacity:1; transform:translateY(0)} }
+    @keyframes flicker{ 0%{opacity:.8} 45%{opacity:1} 50%{opacity:.3} 100%{opacity:1} }
+    .shards{ position:absolute; inset:0; pointer-events:none; filter: drop-shadow(0 10px 24px rgba(0,0,0,.55)); z-index:5; }
+    .shard{
+      position:absolute; width:100%; height:100%; background-size:cover; background-position:center; opacity:0;
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    }
+    .explode .shard{ opacity:1; animation: fly 900ms ease-out forwards; }
+    @keyframes fly{
+      0%{ transform: translate(0,0) rotate(0deg) scale(1); opacity:1 }
+      80%{ opacity:1 }
+      100%{ transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(1.05); opacity:0 }
+    }
+    .explode .chest{ animation: pop-out .45s ease forwards }
+    @keyframes pop-out{ to{ transform: scale(1.05); opacity:0 } }
+    canvas#confetti{ position:fixed; inset:0; pointer-events:none; z-index:8; }
+    @media (min-width: 700px){
+      .app{ gap:28px }
+      .stage{ aspect-ratio: 16 / 11 }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" role="application" aria-label="TikTok Gift Claim">
+    <div class="stage" id="stage">
+      <div class="chest-wrap" id="chestWrap">
+        <img id="chest" class="chest bounce" alt="Treasure chest" src="https://i.ibb.co/WNd3dzNs/Chat-GPT-Image-22-2025-12-58-21-1.png" />
+        <div class="shards" id="shards"></div>
+      </div>
+      <div class="gift" id="gift" aria-hidden="true"><img src="https://cdn2.dps.vc/iblock/a79/a79204e0fab55cdc35ca0bdfa019face/8f06121e1c15be8566b3fc02982a2027.png" alt="TikTok Gift"/></div>
+      <div class="claimed" id="claimed">YOU CLAIMED TIKTOK GIFT!</div>
+    </div>
+    <button id="actionBtn" class="btn" aria-live="polite">Start 00:10</button>
+  </div>
+  <canvas id="confetti"></canvas>
+  <script>
+    const btn = document.getElementById('actionBtn');
+    const chest = document.getElementById('chest');
+    const shardsWrap = document.getElementById('shards');
+    const gift = document.getElementById('gift');
+    const claimed = document.getElementById('claimed');
+    const stage = document.getElementById('stage');
+    let countdown = 10; let ticking = false; let unlocked = false;
+    function formatTime(sec){ let m=Math.floor(sec/60).toString().padStart(2,'0'); let s=(sec%60).toString().padStart(2,'0'); return `${m}:${s}`; }
+    function setBtnText(){ if(!ticking && !unlocked){ btn.textContent = `Start ${formatTime(countdown)}`; return; } if(ticking){ btn.textContent = `${formatTime(countdown)}`; } if(unlocked){ btn.textContent = 'OPEN NOW'; } }
+    setBtnText();
+    btn.addEventListener('click', () => {
+      if(!ticking && !unlocked){ ticking = true; btn.setAttribute('disabled', ''); setBtnText(); const iv = setInterval(()=>{ countdown--; setBtnText(); if(countdown <= 0){ clearInterval(iv); unlocked = true; ticking = false; btn.removeAttribute('disabled'); setBtnText(); } }, 1000); return; }
+      if(unlocked){ unlockSequence(); }
+    });
+    function unlockSequence(){ unlocked = false; btn.classList.add('fade-out'); btn.setAttribute('disabled',''); chest.classList.remove('bounce'); createShards(); stage.classList.add('explode'); setTimeout(()=>{ gift.classList.add('show'); claimed.classList.add('flicker'); launchConfetti(); }, 350); }
+    function createShards(){ shardsWrap.innerHTML = ''; const src = chest.getAttribute('src'); const pieces = [ 'polygon(0% 0%, 50% 0%, 45% 45%, 0% 40%)','polygon(50% 0%, 100% 0%, 100% 40%, 55% 45%)','polygon(0% 40%, 45% 45%, 40% 70%, 0% 65%)','polygon(55% 45%, 100% 40%, 100% 65%, 60% 70%)','polygon(0% 65%, 40% 70%, 35% 100%, 0% 100%)','polygon(60% 70%, 100% 65%, 100% 100%, 65% 100%)','polygon(40% 45%, 60% 45%, 60% 70%, 40% 70%)','polygon(45% 0%, 55% 0%, 60% 45%, 40% 45%)']; pieces.forEach((poly, i)=>{ const d = document.createElement('div'); d.className = 'shard'; d.style.backgroundImage = `url(${src})`; d.style.clipPath = poly; const angle = (i / pieces.length) * Math.PI * 2 + (Math.random() * .7 - .35); const dist = 80 + Math.random()*120; const tx = Math.cos(angle) * dist; const ty = Math.sin(angle) * dist - 20; const rot = (Math.random()*120 - 60) + 'deg'; d.style.setProperty('--tx', tx + 'px'); d.style.setProperty('--ty', ty + 'px'); d.style.setProperty('--rot', rot); shardsWrap.appendChild(d); }); stage.classList.add('explode'); setTimeout(()=>{ shardsWrap.innerHTML=''; }, 1200); }
+    const canvas = document.getElementById('confetti'); const ctx = canvas.getContext('2d'); let confettiRaf; function resize(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; } window.addEventListener('resize', resize, {passive:true}); resize(); function launchConfetti(){ const particles = []; const colors = ['#ffffff', '#20f2ff', '#ff2d55', '#ffe066']; const count = Math.min(400, Math.floor(window.innerWidth * 0.7)); for(let i=0;i<count;i++){ particles.push({ x: canvas.width/2 + (Math.random()*80 - 40), y: canvas.height*0.35 + (Math.random()*40 - 20), r: Math.random()*4 + 2, c: colors[i % colors.length], vx: (Math.random()*4 - 2) * (1 + Math.random()*0.6), vy: (Math.random()*-3 - 2), g: .06 + Math.random()*0.04, a: 1, s: Math.random()*2*Math.PI }); } const start = performance.now(); cancelAnimationFrame(confettiRaf); function tick(t){ const elapsed = t - start; ctx.clearRect(0,0,canvas.width,canvas.height); particles.forEach(p=>{ p.vy += p.g; p.x += p.vx; p.y += p.vy; p.s += 0.1; p.a *= 0.995; ctx.globalAlpha = Math.max(0, p.a); ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(Math.sin(p.s)*1.2); ctx.fillStyle = p.c; ctx.beginPath(); ctx.moveTo(-p.r, -p.r); ctx.lineTo(p.r, -p.r); ctx.lineTo(p.r, p.r); ctx.lineTo(-p.r, p.r); ctx.closePath(); ctx.fill(); ctx.restore(); }); ctx.globalAlpha = 1; if(elapsed < 5000){ confettiRaf = requestAnimationFrame(tick); } else { ctx.clearRect(0,0,canvas.width,canvas.height); } } confettiRaf = requestAnimationFrame(tick); }
+  </script>
+</body>
+</html>
